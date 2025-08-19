@@ -29,7 +29,7 @@ class SnipLSTM(nn.Module):
         )
         lstm_out_size = lstm_hidden * (2 if bidirectional else 1)
 
-        # self.norm_static = nn.LayerNorm(static_input_size) -> clean up
+        self.norm_static = nn.LayerNorm(static_input_size) #-> clean up
         self.head = nn.Sequential(
             nn.Linear(lstm_out_size + static_input_size, mlp_hidden),
             nn.ReLU(),
@@ -48,7 +48,7 @@ class SnipLSTM(nn.Module):
         # hn: [num_layers * num_dirs, B, H]
         lstm_summary = hn[-1]
 
-        # x_static = self.norm_static(x_static) <- clean up
+        x_static = self.norm_static(x_static) #<- clean up
         h = torch.cat([lstm_summary, x_static], dim=1)   # [B, H + C_static]
         logits = self.head(h)                             # [B, num_tasks]  <-- no squeeze
         return logits
