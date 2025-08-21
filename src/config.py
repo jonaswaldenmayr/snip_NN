@@ -8,11 +8,19 @@ import json, time
 class Config:
 
     # ----- data -----
-    train_path: str = "data/processed/04_train_22-24_midfull_22.json"
-    val_path:   str = "data/processed/04_test_22-24_midfull_22.json"
-    label_keys: tuple[str, ...] = ("2_2",)
+    train_path: str = "data/processed/04_train_22-24_midfull_55.json"
+    val_path:   str = "data/processed/04_test_22-24_midfull_55.json"
+    label_keys: tuple[str, ...] = ("5_5",)
     seq_keys:   tuple[str, ...] = ("cumLogVsBuy","rollVol","logRet","drawdown","runup","volNormRet")
     static_keys:tuple[str, ...] = ("dailyDrops","buySpread","buyPrice","dropSize","volatility","tod_sin","tod_cos","hist.daily.mean","hist.daily.vol","hist.daily.mdd","hist.weekly.mom","hist.monthly.mdd")
+
+
+    # # ----- data -----
+    # train_path: str = "data/processed/04_train_22-24_midfull_22.json"
+    # val_path:   str = "data/processed/04_test_22-24_midfull_22.json"
+    # label_keys: tuple[str, ...] = ("2_2",)
+    # seq_keys:   tuple[str, ...] = ("cumLogVsBuy","rollVol","logRet","drawdown","runup","volNormRet")
+    # static_keys:tuple[str, ...] = ("dailyDrops","buySpread","buyPrice","dropSize","volatility","tod_sin","tod_cos","hist.daily.mean","hist.daily.vol","hist.daily.mdd","hist.weekly.mom","hist.monthly.mdd")
 
     # # ----- data - BASE SETUP -----
     # train_path: str = "data/processed/03_train_new25k.json"

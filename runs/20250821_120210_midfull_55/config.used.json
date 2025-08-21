@@ -1,0 +1,52 @@
+{
+  "train_path": "data/processed/04_train_22-24_midfull_55.json",
+  "val_path": "data/processed/04_test_22-24_midfull_55.json",
+  "label_keys": [
+    "5_5"
+  ],
+  "seq_keys": [
+    "cumLogVsBuy",
+    "rollVol",
+    "logRet",
+    "drawdown",
+    "runup",
+    "volNormRet"
+  ],
+  "static_keys": [
+    "dailyDrops",
+    "buySpread",
+    "buyPrice",
+    "dropSize",
+    "volatility",
+    "tod_sin",
+    "tod_cos",
+    "hist.daily.mean",
+    "hist.daily.vol",
+    "hist.daily.mdd",
+    "hist.weekly.mom",
+    "hist.monthly.mdd"
+  ],
+  "model_name": "lstm01",
+  "seq_input_size": 6,
+  "static_input_size": 12,
+  "lstm_hidden": 64,
+  "lstm_layers": 1,
+  "bidirectional": false,
+  "mlp_hidden": 64,
+  "dropout": 0.1,
+  "num_tasks": 1,
+  "loop_name": "standard",
+  "epochs": 20,
+  "patience": 10,
+  "batch_size": 128,
+  "lr": 0.001,
+  "weight_decay": 0.0001,
+  "grad_clip": 1.0,
+  "seed": 42,
+  "use_pos_weight": true,
+  "pos_weight_cap": null,
+  "compute_norms": true,
+  "threshold": 0.5,
+  "run_id": "20250821_120210",
+  "run_dir": "runs"
+}
