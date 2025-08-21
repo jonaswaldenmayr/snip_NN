@@ -42,23 +42,42 @@ def _run_epoch(model, loader, device, optimizer=None, pos_weight=None, norm=None
     return mean_loss, mets
 
 @register("standard")
-def fit(model, train_dl, val_dl, device, cfg, norm, pos_weight, optimizer) -> Dict[str, float]:
+def fit(
+    model, train_dl, val_dl, device, cfg, norm, pos_weight, optimizer,
+    ckpt_best: str | None = None,
+) -> Dict[str, float]:
+    import os
+    from pathlib import Path
+
+    def _atomic_save(state, path: str):
+        p = Path(path); p.parent.mkdir(parents=True, exist_ok=True)
+        tmp = str(p) + ".tmp"
+        torch.save(state, tmp)
+        os.replace(tmp, str(p))
+
     best_val, bad = math.inf, 0
+
     for epoch in range(1, cfg.epochs + 1):
         tr_loss, tr_mets = _run_epoch(model, train_dl, device, optimizer=optimizer,
                                       pos_weight=pos_weight, norm=norm)
         va_loss, va_mets = _run_epoch(model, val_dl,   device, optimizer=None,
                                       pos_weight=pos_weight, norm=norm)
+
         print(
             f"Epoch {epoch:02d} | "
             f"train loss {tr_loss:.4f} acc {tr_mets['acc']:.3f} | "
             f"val  loss {va_loss:.4f} acc {va_mets['acc']:.3f} "
             f"(prec {va_mets['precision']:.3f}, rec {va_mets['recall']:.3f})"
         )
+
         if va_loss < best_val - 1e-4:
             best_val, bad = va_loss, 0
+            if ckpt_best:
+                _atomic_save(model.state_dict(), ckpt_best)
         else:
             bad += 1
             if bad >= cfg.patience:
                 print("Early stopping."); break
+
     return {"best_val_loss": best_val}
+

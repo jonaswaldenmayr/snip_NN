@@ -123,7 +123,7 @@ def label_dists_from_raw(
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--raw", default="snips_25k.json", help="raw filename under data/raw/")
+    ap.add_argument("--raw", default="validationSNIPS.json", help="raw filename under data/raw/")
     ap.add_argument("--keys", nargs="*", default=["2_2", "5_5", "8_8", "2_5", "5_2"])
     args = ap.parse_args()
     label_dists_from_raw(args.raw, args.keys)

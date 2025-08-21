@@ -3,7 +3,6 @@ from pathlib import Path
 import math, json, torch
 from src.data.datasets import MinSnipDataset
 from src.models.factory import get_model
-from src.utils.helper import collect_hits_simple
 from src.config import CFG, save_used_config
 from src.train_loops import get as get_loop
 from src.utils.device import get_device                 # <--- moved
@@ -35,13 +34,26 @@ def main():
 
     # Loaders
     train_dl = MinSnipDataset.make_dataloader(
-        train_path, batch_size=CFG.batch_size, shuffle=True, num_workers=0, seed=CFG.seed,
-        label_keys=CFG.label_keys
+        train_path,
+        batch_size=CFG.batch_size,
+        shuffle=True,
+        num_workers=0,
+        seed=CFG.seed,
+        label_keys=CFG.label_keys,
+        seq_keys=list(CFG.seq_keys),
+        static_keys=list(CFG.static_keys),
     )
+
     val_dl = MinSnipDataset.make_dataloader(
-        val_path, batch_size=CFG.batch_size, shuffle=False, num_workers=0,
-        label_keys=CFG.label_keys
+        val_path,
+        batch_size=CFG.batch_size,
+        shuffle=False,
+        num_workers=0,
+        label_keys=CFG.label_keys,
+        seq_keys=list(CFG.seq_keys),
+        static_keys=list(CFG.static_keys),
     )
+
 
     # Model (num_tasks from labels)
     num_tasks = len(CFG.label_keys)
@@ -81,11 +93,13 @@ def main():
         norm=norm,
         pos_weight=pos_weight,
         optimizer=optimizer,
+        ckpt_best=paths["ckpt"],   # <--- add this line
+
     )
     # ---------------------------------------------------
 
     # Save model 
-    torch.save(model.state_dict(), paths["ckpt"])
+    # torch.save(model.state_dict(), paths["ckpt"])
 
      # === Save basic loop metrics first ===
     with open(paths["metrics"], "w") as f:
@@ -93,56 +107,5 @@ def main():
 
 
 
-
-
-
-
-
-    # === Rich validation metrics + threshold sweep === -> if unnecessary, remove it & utils functions
-    model.eval()
-    all_probs, all_targets = [], []
-    with torch.no_grad():
-        for b in val_dl:
-            x_seq    = b["x_seq"].to(device)
-            x_static = b["x_static"].to(device)
-            mask     = b["mask"].to(device)
-            y        = b["y"].to(device)
-            logits = model(x_seq, x_static, mask)
-            probs  = torch.sigmoid(logits)
-            all_probs.append(probs.cpu()); all_targets.append(y.cpu())
-    probs_val   = torch.cat(all_probs)
-    targets_val = torch.cat(all_targets)
-
-    from src.utils.metrics import pr_auc_score_fast, roc_auc_score_fast, binary_metrics
-    from src.utils.thresholds import sweep_thresholds
-
-    pr_auc  = pr_auc_score_fast(probs_val, targets_val)
-    roc_auc = roc_auc_score_fast(probs_val, targets_val)
-    best_thr, best_score = sweep_thresholds(probs_val, targets_val, metric="f1")
-    mets_at_best = binary_metrics((probs_val>=best_thr).float(), targets_val.float(), thresh=0.5)
-
-    # Save thresholds
-    thresholds_path = str(Path(paths["metrics"]).with_name("thresholds.json"))
-    with open(thresholds_path, "w") as f:
-        json.dump({"best_threshold": best_thr, "metric": "f1", "score": best_score}, f, indent=2)
-
-    # Append richer metrics
-    with open(paths["metrics"], "w") as f:
-        json.dump({
-            **(metrics or {}),
-            "roc_auc": roc_auc,
-            "pr_auc": pr_auc,
-            "best_threshold": best_thr,
-            "f1_at_best_thr": mets_at_best["f1"],
-            "precision_at_best_thr": mets_at_best["precision"],
-            "recall_at_best_thr": mets_at_best["recall"],
-        }, f, indent=2)
-
-    print(f"[VAL] PR-AUC {pr_auc:.4f} | ROC-AUC {roc_auc:.4f} | "
-          f"best thr {best_thr:.2f} → "
-          f"F1 {mets_at_best['f1']:.3f} "
-          f"(P {mets_at_best['precision']:.3f}, R {mets_at_best['recall']:.3f})")
-
-    print("Done.")
 if __name__ == "__main__":
     main()

@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 from dataclasses import dataclass, asdict, field
 from pathlib import Path
@@ -6,23 +5,16 @@ import json, time
 
 @dataclass
 class Config:
-
     # ----- data -----
-    train_path: str = "data/processed/04_train_22-24_midfull_22.json"
-    val_path:   str = "data/processed/04_test_22-24_midfull_22.json"
+    train_path: str = "data/processed/03_train_new25k.json"
+    val_path:   str = "data/processed/03_test_new25k.json"
     label_keys: tuple[str, ...] = ("2_2",)
     seq_keys:   tuple[str, ...] = ("cumLogVsBuy","rollVol","logRet","drawdown","runup","volNormRet")
-    static_keys:tuple[str, ...] = ("dailyDrops","buySpread","buyPrice","dropSize","volatility","tod_sin","tod_cos","hist.daily.mean","hist.daily.vol","hist.daily.mdd","hist.weekly.mom","hist.monthly.mdd")
 
-    # # ----- data - BASE SETUP -----
-    # train_path: str = "data/processed/03_train_new25k.json"
-    # val_path:   str = "data/processed/03_test_new25k.json"
-    # label_keys: tuple[str, ...] = ("2_2",)                          #choose 2_2
-    # seq_keys:   tuple[str, ...] = ("cumLogVsBuy","rollVol")
-    # static_keys:tuple[str, ...] = ("dailyDrops","buySpread","buyPrice","dropSize","volatility")
+    static_keys:tuple[str, ...] = ("dailyDrops","buySpread","buyPrice","dropSize","volatility","tod_sin","tod_cos","hist.daily.mean","hist.daily.vol","hist.daily.mdd","hist.      weekly.mom","hist.monthly.mdd")
 
     # ----- model -----
-    model_name: str = "lstm01"   # lstm01, "hybrid01"
+    model_name: str = "hybrid01"   # lstm01, "hybrid01"
     seq_input_size: int = 2
     static_input_size: int = 5
     lstm_hidden: int = 64
@@ -34,8 +26,8 @@ class Config:
 
     # ----- training -----
     loop_name: str = "standard"
-    epochs: int = 20
-    patience: int = 10
+    epochs: int = 200
+    patience: int = 20
     batch_size: int = 128
     lr: float = 1e-3
     weight_decay: float = 1e-4
@@ -48,7 +40,7 @@ class Config:
     compute_norms: bool = True
 
     # ----- eval -----
-    threshold: float = 0.5
+    threshold: float = 0.65
 
     # ----- artifacts (auto-filled run folder) -----
     run_id: str = field(default_factory=lambda: time.strftime("%Y%m%d_%H%M%S"))
